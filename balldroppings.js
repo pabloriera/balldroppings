@@ -31,15 +31,11 @@
 const synth = new Tone.PolySynth(synth1).toDestination(); */
 
 
-var a = []
 
 var notes = ['C1', 'Db1', 'D1', 'Eb1', 'E1', 'F1', 'Gb1', 'G1', 'Ab1', 'A1', 'Bb1', 'B1', 'C2', 'Db2', 'D2', 'Eb2', 'E2', 'F2', 'Gb2', 'G2', 'Ab2', 'A2', 'Bb2', 'B2', 'C3', 'Db3', 'D3', 'Eb3', 'E3', 'F3', 'Gb3', 'G3', 'Ab3', 'A3', 'Bb3', 'B3', 'C4', 'Db4', 'D4', 'Eb4', 'E4', 'F4', 'Gb4', 'G4', 'Ab4', 'A4', 'Bb4', 'B4', 'C5', 'Db5', 'D5', 'Eb5', 'E5', 'F5', 'Gb5', 'G5', 'Ab5', 'A5', 'Bb5', 'B5', 'C6', 'Db6', 'D6', 'Eb6', 'E6', 'F6', 'Gb6', 'G6', 'Ab6', 'A6', 'Bb6', 'B6', 'C7', 'Db7', 'D7', 'Eb7', 'E7', 'F7', 'Gb7', 'G7', 'Ab7', 'A7', 'Bb7', 'B7'];
 var midi_output;
 WebMidi.enable();
-
 midi_output = WebMidi.outputs[0];
-
-
 const poly = new Tone.PolySynth(Tone.AMSynth).toDestination();
 
 //global variables
@@ -49,13 +45,13 @@ var lines = [];
 var balls = [];
 var draggable = -1;
 var dragside = 0;
-var ballEmitterX = 100;
+var ballEmitterX = 500;
 var ballEmitterY = 100;
 var ticks = 0;
 var ballDropRate = 100;
 var gravity = 0.3;
 var dt = 0.1;
-var sendmidi = true;
+var sendmidi = false;
 var playsynth = true;
 //-------------------------------------------------------------
 
@@ -272,42 +268,55 @@ window.onload = function () {
     };
 
 
-    p.mousePressed = function () {
-        mouseIsDown = true;
+    p.mousePressed = function (e) {
+        if (p.mouseButton == 1) {
+            mouseIsDown = true;
 
-        //checking for dragging old line
-        var foundOne = false;
-        for (var i = 0; i < lines.length; i++) {
-            if (this.dist(lines[i].x1, lines[i].y1, p.mouseX, p.mouseY) < 6) {
-                foundOne = true;
-                draggable = i;
-                dragside = 0;
-                break;
+            //checking for dragging old line
+            var foundOne = false;
+            for (var i = 0; i < lines.length; i++) {
+                if (this.dist(lines[i].x1, lines[i].y1, p.mouseX, p.mouseY) < 6) {
+                    foundOne = true;
+                    draggable = i;
+                    dragside = 0;
+                    break;
+                }
+
+                if (this.dist(lines[i].x2, lines[i].y2, p.mouseX, p.mouseY) < 6) {
+                    foundOne = true;
+                    draggable = i;
+                    dragside = 1;
+                    break;
+                }
             }
 
-            if (this.dist(lines[i].x2, lines[i].y2, p.mouseX, p.mouseY) < 6) {
-                foundOne = true;
-                draggable = i;
-                dragside = 1;
-                break;
+
+            if (!foundOne) {
+                var newLine = new EditLine();
+                newLine.x1 = p.mouseX;
+                newLine.y1 = p.mouseY;
+                newLine.x2 = p.mouseX;
+                newLine.y2 = p.mouseY;
+                lines.push(newLine);
             }
+
         }
 
+        if (p.mouseButton == 3) {
 
-        if (!foundOne) {
-            var newLine = new EditLine();
-            newLine.x1 = p.mouseX;
-            newLine.y1 = p.mouseY;
-            newLine.x2 = p.mouseX;
-            newLine.y2 = p.mouseY;
-            lines.push(newLine);
+            ballEmitterX = p.mouseX;
+            ballEmitterY = p.mouseY;
         }
+
 
     };
 
     p.mouseReleased = function () {
-        mouseIsDown = false;
-        draggable = -1;
+        if (p.mouseButton == 1) {
+
+            mouseIsDown = false;
+            draggable = -1;
+        }
 
     };
 
